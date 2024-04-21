@@ -1,0 +1,8 @@
+# install with conda env create -f env-dsci-575.yml 
+name: '575'
+channels:
+  - conda-forge
+  - pytorch
+  - anaconda
+  - plotly
+  - defaults
