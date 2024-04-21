@@ -4,6 +4,10 @@ library(dplyr)
 library(plotly)
 library(gapminder) 
 library(RColorBrewer)
+library(shinyWidgets)
+
+column_names <- c("Life Expectancy" = "lifeExp", "Population" = "pop", "GDP per Capita" = "gdpPercap")
+
 
 gapminder <- gapminder |> 
   mutate(continent = if_else(continent == "Oceania", "Asia", continent))
