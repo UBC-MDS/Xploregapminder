@@ -1,78 +1,3 @@
----
-title: "R Notebook"
-output: html_notebook
----
-
-```{r}
-library(gapminder)
-library(dplyr)
-library(ggplot2)
-library(shiny)
-library(plotly)
-```
-
-```{r}
-max(gapminder$year)
-```
-
-
-# Hans Rosling visualization with Gapminder
-# life expectancy by 
-```{r}
-gapminder %>%
-  filter(year == 2007) %>%
-  group_by(continent) %>%
-  summarise(lifeExp = median(lifeExp))
-```
-```{r}
-gapminder <- gapminder |> 
-  mutate(continent = if_else(continent == "Oceania", "Asia", continent))
-```
-
-
-
-
-```{r}
-# based on year
-gm_f <- gapminder |> filter(year == '2007') 
-```
-
-
-
-
-```{r}
-ggplot(data = gm_f, aes(x = gdpPercap, y = pop)) +
-  geom_point(aes(size = lifeExp, color = continent)) +
-  scale_x_log10(breaks = c(500, 1000, 2000, 4000,
-                           8000, 16000, 32000, 64000)) +
-  scale_y_continuous(breaks = seq(0, 90, by = 10)) +
-  scale_color_manual(values = c("#FFDB6D", "#C3D7A4",
-                                "#D16103", "#56B4E9")) +
-  labs(x = "GDP per Capita",
-       y = "Life Expectancy") +
-theme_minimal()
-  
-```
-
-
-## ISSUES
-
-# The legend for the size input does not appear: It started after adding a column selection for size. 
-
-
-
-
-## ISSUES
-# The plots don't appear
-# + previous issue of legend not appear
-# "Population" is selected as the default X even though it should be GDP per Capita
-# Can't seem to 
-
-
-
-
-
-```{r}
 library(shiny)
 library(ggplot2)
 library(dplyr)
@@ -137,7 +62,7 @@ server <- function(input, output, session) {
       choices = setdiff(names(column_names), input$ycol)
     )
   })
-
+  
   observe({
     updatePickerInput(
       session,
@@ -156,7 +81,7 @@ server <- function(input, output, session) {
     
     cols = colnames(gm_f |> select(4:6))
     size_col <- setdiff(cols, c(x_var, y_var))
-  
+    
     gg <- ggplot(data = gm_f, aes_string(
       x = x_var, 
       y = y_var, 
@@ -164,17 +89,17 @@ server <- function(input, output, session) {
       size = size_var,
       text = "country"
     )) +
-    geom_point(alpha = 0.7) +
-    scale_color_manual(values = c("#FFDB6D", "#C3D7A4", "#D16103", "#56B4E9")) +
-    theme_minimal() +
-    labs(x = input$xcol, y = input$ycol)
-
+      geom_point(alpha = 0.7) +
+      scale_color_manual(values = c("#FFDB6D", "#C3D7A4", "#D16103", "#56B4E9")) +
+      theme_minimal() +
+      labs(x = input$xcol, y = input$ycol)
+    
     if (x_var == "gdpPercap") {
       gg <- gg + scale_x_log10(breaks = c(500, 1000, 2000, 4000, 8000, 16000, 32000, 64000))
     } else {
       gg <- gg + scale_x_continuous()
     }
-
+    
     if (x_var == "gdpPercap") {
       gg <- gg + scale_y_log10(breaks = c(500, 1000, 2000, 4000, 8000, 16000, 32000, 64000))
     } else {
@@ -189,83 +114,34 @@ server <- function(input, output, session) {
     gm_f <- gapminder |>
       filter(year == as.numeric(input$yearInput), continent %in% input$continentInput)
     
-      orRd_colors <- colorRampPalette(brewer.pal(9, "OrRd"))(100)
+    orRd_colors <- colorRampPalette(brewer.pal(9, "OrRd"))(100)
     
-      plot <- plot_geo(gm_f, locations = ~country, locationmode = 'country names') %>%
-        add_trace(
-          z = as.formula(paste0("~", column_names[input$geoColorVar])),
-          colors = orRd_colors,  
-          type = 'choropleth',
-          marker = list(line = list(color = 'rgb(40,40,40)', width = 0.5))) |>
-        colorbar(title = "Life Expectancy") |>
-        layout(
-          title = paste('Global', input$geoColorVar , 'in', input$yearInput),
-          geo = list(
-            scope = "world",
-            projection = list(type = "natural earth"),
-            showland = TRUE,
-            landcolor = "lightgrey",
-            showcountries = TRUE,
-            countrycolor = "darkgrey",
-            coastlinecolor = "black",
-            framecolor = "white",  
-            bgcolor = 'white'
-          ),
-          margin = list(l = 0, r = 0, t = 50, b = 0),
-          paper_bgcolor = 'white', 
-          plot_bgcolor = 'white' 
+    plot <- plot_geo(gm_f, locations = ~country, locationmode = 'country names') %>%
+      add_trace(
+        z = as.formula(paste0("~", column_names[input$geoColorVar])),
+        colors = orRd_colors,  
+        type = 'choropleth',
+        marker = list(line = list(color = 'rgb(40,40,40)', width = 0.5))) |>
+      colorbar(title = "Life Expectancy") |>
+      layout(
+        title = paste('Global', input$geoColorVar , 'in', input$yearInput),
+        geo = list(
+          scope = "world",
+          projection = list(type = "natural earth"),
+          showland = TRUE,
+          landcolor = "lightgrey",
+          showcountries = TRUE,
+          countrycolor = "darkgrey",
+          coastlinecolor = "black",
+          framecolor = "white",  
+          bgcolor = 'white'
+        ),
+        margin = list(l = 0, r = 0, t = 50, b = 0),
+        paper_bgcolor = 'white', 
+        plot_bgcolor = 'white' 
       )    
   })
   return(output)
 }
 
 shinyApp(ui = ui, server = server)
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# world map 
-```{r}
-world <- map_data("world")
-
-ggplot(world) + geom_map(map = world,
-           aes(long, lat, group = group, map_id = region,
-               fill = continent)) +
-  coord_map(xlim = c(-180, 180),
-            ylim = c(-200, 200))
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
